@@ -1,0 +1,42 @@
+{
+  "manifest_version": 2,
+  "name": "Image MetaData Extractor",
+  "version": "1.0",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "tabs",
+    "https://localhost:7090/",
+    "https://stackpath.bootstrapcdn.com/",
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": [ "<all_urls>" ],
+      "js": [ "wwwroot/js/content.js" ],
+      "run_at": "document_end"
+    }
+  ],
+
+  "browser_action": {
+    "default_icon": {
+      "16": "img/icons16.png",
+      "48": "img/icons48.png",
+      "128": "img/icons128.png"
+    }
+  },
+  "icons": {
+    "16": "img/icons16.png",
+    "48": "img/icons48.png",
+    "128": "img/icons128.png"
+  }
+}
+
+
+
+
+
+
+
+
+

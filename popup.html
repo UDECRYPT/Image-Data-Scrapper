@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>File MetaData Extractor</title>
+    <style>
+        body {
+            width: 300px;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 10px;
+        }
+
+        #uploadForm {
+            display: flex;
+            flex-direction: column;
+        }
+
+        input[type="file"] {
+            margin-bottom: 10px;
+        }
+
+        #metadata {
+            margin-top: 10px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+
+            #metadata p {
+                margin: 5px 0;
+            }
+    </style>
+</head>
+<body>
+    <h4>Upload File</h4>
+    <form id="uploadForm">
+        <input type="file" id="fileInput" />
+        <button type="button" id="uploadButton">Get Metadata</button>
+    </form>
+    <div id="metadata"></div>
+    <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File MetaData Extractor</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            max-width: 800px;
+            margin: 20px auto;
+        }
+
+        #metadata {
+            margin-top: 20px;
+            border-top: 1px solid #dee2e6;
+            padding-top: 20px;
+        }
+
+            #metadata p {
+                margin: 5px 0;
+            }
+
+        .btn-custom {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid" style="background-color:lightgray;padding:50px">
+        <h1>Data Extraction Tool</h1>
+</div>
+    <div class="container-fluid">
+        <h4 class="my-4">Upload File To Extract its Data</h4>
+        <form id="uploadForm">
+            <div class="form-group">
+                <input type="file" id="fileInput" class="form-control-file" />
+            </div>
+            <button type="button" id="uploadButton" class="btn btn-primary">Get Metadata</button>
+        </form>
+        <div id="metadata" class="mt-4"></div>
+    </div>
+
+    <script>
+        document.getElementById('uploadButton').addEventListener('click', async function () {
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length === 0) {
+                alert('Please select a file first.');
+                return;
+            }
+            const file = fileInput.files[0];
+            await scrapeMetadata(file);
+        });
+
+        async function scrapeMetadata(file) {
+            var formData = new FormData();
+            formData.append('file', file);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/FilesMetaDataExtractor/GetMetadata', true);
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    console.log(response);
+                    if (response.error) {
+                        alert('Error fetching metadata: ' + response.error);
+                    } else {
+                        const metadataDiv = document.getElementById('metadata');
+                        let metadataHTML = `<h4 class="mb-3">File Metadata:</h4>`;
+                        for (const key in response) {
+                            metadataHTML += `<p><strong>${key}:</strong> ${response[key]}</p>`;
+                        }
+
+                        // Add buttons
+                        metadataHTML += `<button id="viewHistory" class="btn btn-info btn-custom" style="margin-right:15px">View History</button>`;
+                        metadataHTML += `<button id="closeMetadata" class="btn btn-secondary btn-custom">Close</button>`;
+
+                        metadataDiv.innerHTML = metadataHTML;
+
+                        // Save metadata to localStorage
+                        var history = JSON.parse(localStorage.getItem('metadataHistory')) || [];
+                        history.push(response);
+                        localStorage.setItem('metadataHistory', JSON.stringify(history));
+
+                        document.getElementById('viewHistory').addEventListener('click', function () {
+                            viewHistory(metadataDiv);
+                        });
+
+                        document.getElementById('closeMetadata').addEventListener('click', function () {
+                            metadataDiv.innerHTML = ''; // Clear the metadata div
+                        });
+                    }
+                } else {
+                    alert('Error fetching metadata. Status Code: ' + xhr.status);
+                }
+            };
+            xhr.onerror = function () {
+                alert('Request failed. Please check your connection.');
+            };
+            xhr.send(formData);
+        }
+
+        function viewHistory(metadataDiv) {
+            const history = JSON.parse(localStorage.getItem('metadataHistory')) || [];
+            if (history.length === 0) {
+                alert('No history available.');
+                return;
+            }
+
+            // Store the current metadata HTML
+            const currentMetadataHTML = metadataDiv.innerHTML;
+
+            // Generate HTML for history
+            let historyHTML = `<h4 class="mb-3">Metadata History:</h4>`;
+            history.forEach((metadata, index) => {
+                historyHTML += `<h5 class="mb-2">File ${index + 1}</h5>`;
+                for (const key in metadata) {
+                    historyHTML += `<p><strong>${key}:</strong> ${metadata[key]}</p>`;
+                }
+            });
+
+            // Add close button
+            historyHTML += `<button id="closeHistory" class="btn btn-secondary btn-custom">Close</button>`;
+
+            metadataDiv.innerHTML = historyHTML;
+
+            // Add event listener to the Close button
+            document.getElementById('closeHistory').addEventListener('click', function () {
+                metadataDiv.innerHTML = currentMetadataHTML;
+            });
+        }
+    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
